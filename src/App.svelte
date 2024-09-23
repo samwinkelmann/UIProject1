@@ -15,11 +15,15 @@
   let todaysDate = new Date();
   let currentDate;
   let currentTime;
+  let name;
+  let numLogins = 0;
   let totalMinutes = 0;
+  let screenTimeHidden = false;
+  let journalHidden = false;
   let selectedDate = new Date().toISOString().split('T')[0];
   let entriesByDate = {};
   let journalEntries = [];
-  let pastEntries = ["hi","buh","cuh","fuh"];
+  let pastEntries = [];
   let newEntry = '';
 
   function addScreenTime() {
@@ -70,9 +74,17 @@
     return date.toISOString().split('T')[0];
   }
 
-  function changeDate(days) {
+  function changeDateBack(days) {
     todaysDate.setDate(todaysDate.getDate() + days);
     todaysDate = new Date(todaysDate); // Update the date object
+    pastEntries = ["tv: 8h 20m","phone: 2h 20m","computer: 3hr 0m","lot of work today"];
+    formatDate(todaysDate);
+  }
+
+  function changeDateFor(days) {
+    todaysDate.setDate(todaysDate.getDate() + days);
+    todaysDate = new Date(todaysDate); // Update the date object
+    pastEntries = [];
     formatDate(todaysDate);
   }
 
@@ -81,23 +93,57 @@
     currentDate = date.toLocaleDateString();
     currentTime = date.toLocaleTimeString();
   });
+
+  function loggedIn() {
+    numLogins += 1;
+  }
+
+  function hideScreenTimeEntry() {
+    const forms = document.getElementsByClassName('screentime');
+    if (screenTimeHidden == true) {
+      form.style.display = 'block';
+    }
+    else {
+        for (const form of forms) {
+        form.style.display = 'none'; 
+        screenTimeHidden = true;
+      }
+    }
+  }
+
+  function hideJournalEntry() {
+    const forms = document.getElementsByClassName('journalentry');
+    if (journalHidden == true) {
+      form.style.display = 'block';
+    }
+    else {
+        for (const form of forms) {
+        form.style.display = 'none'; 
+        journalHidden = true;
+      }
+    }
+  }
+
+  loggedIn();
 </script>
 
 <main>
   <div class="header">Screen Time Tracking<br><div class="date">
   {currentDate + " " + currentTime}
   </div>
+  Hello, {name}!<br>
+  You've Tracked {numLogins} Times!
   </div>
 
 <div class="form">
-  <div>
+  <div class="screentime">
     <h2>Screen Time Input</h2>
   <input type="text" class="screentype" placeholder="Device" bind:value={device} />
   <input type="number" class= "numberinput" placeholder="Hours" bind:value={hours} min="0" />
   <input type="number" class="numberinput" placeholder="Minutes" bind:value={minutes} min="0" /><br><br>
   <button on:click={addScreenTime}>Add Screen Time</button><br></div>
 
-  <div>
+  <div class="journalentry">
   <h2>Journal</h2>
   <input type="text" class="journal"
     placeholder="Write your journal entry here" 
@@ -113,7 +159,7 @@
     {/each}
   <h3>Total Screen Time Today: {totalMinutes} minutes</h3>
   <h3>Screen Time Limit: {limitTime} minutes</h3>
-  <h3>{"You've used " + percent.toPrecision(3) + "% of today's limit" }</h3>
+  <h3>{"You've reached " + percent.toPrecision(3) + "% of today's limit" }</h3>
 </div>
 <div class="journal-list">
   <h3>Journal Entries</h3>
@@ -123,9 +169,9 @@
 </div>
 <div class="pastentries">
   <div class="date-container">
-    <button class="button" on:click={() => changeDate(-1)}>Prev Day</button>
+    <button class="button" on:click={() => changeDateBack(-1)}>Prev Day</button>
     <div class="date">{formatDate(todaysDate)}</div>
-    <button class="button" on:click={() => changeDate(1)}>Next Day</button>
+    <button class="button" on:click={() => changeDateFor(1)}>Next Day</button>
   </div>
   <h2>{#each pastEntries as entry}
     <li>{entry}</li>
@@ -140,10 +186,14 @@
   <h3><button on:click={setLimit}>Set Limit</button></h3>
 </div></div>
 
+<input type="text" class="namebox" placeholder="Name" bind:value={name} />
+
 <button class="button" on:click={toggleColors}>
   Dark/Light
 </button>
 
+<button class="button" on:click={hideScreenTimeEntry}>Hide Screen Time Entry</button>
+<button class="button" on:click={hideJournalEntry}>Hide Journal Entry</button>
 </main>
 
 <style>
